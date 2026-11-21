@@ -1,9 +1,10 @@
 import { CodieAPI, APIError, normalizeDeviceUrl } from "../src/codie.js";
+import { t, setLang, getLang, applyI18n, detectLang } from "../src/i18n.js";
 
 const $ = (id) => document.getElementById(id);
 const P = "/v1/api";
 const MAX_IMAGE = 1024 * 1024 - 4096; // 画像は最大 1 MiB
-const STATE_TEXT = { queued: "待機中…", starting: "開始中…", receiving_input: "入力中…", thinking: "考え中…", responding: "返答中(端末で再生)…", cancelling: "中止中…" };
+const STATE_KEYS = { queued: "s_queued", starting: "s_starting", receiving_input: "s_receiving_input", thinking: "s_thinking", responding: "s_responding", cancelling: "s_cancelling" };
 const TERMINAL = new Set(["completed", "failed", "cancelled"]);
 
 const st = {
@@ -15,7 +16,7 @@ const st = {
 };
 
 const store = {
-  get: async () => chrome.storage.local.get({ deviceUrl: "", creds: null, scope: "session", clearOnNew: false, showOlder: false, boundaries: {}, pairing: null }),
+  get: async () => chrome.storage.local.get({ lang: "", deviceUrl: "", creds: null, scope: "session", clearOnNew: false, showOlder: false, boundaries: {}, pairing: null }),
   set: (o) => chrome.storage.local.set(o),
 };
 
@@ -55,7 +56,7 @@ function render() {
   log.replaceChildren();
   if (st.hasMore) {
     const more = document.createElement("button");
-    more.className = "more ghost"; more.textContent = "さらに古い履歴を読み込む";
+    more.className = "more ghost"; more.textContent = t("loadOlder");
     more.onclick = () => loadHistory({ older: true }).catch((e) => showError(errText(e)));
     log.append(more);
   }
@@ -76,12 +77,12 @@ function render() {
   }
   if (!placed) log.append(divider(b));
   if (st.turn) {
-    log.append(bubble("user", st.turn.text || (st.turn.hasImage ? "📷 画面" : ""), "pending"));
+    log.append(bubble("user", st.turn.text || (st.turn.hasImage ? t("attachedShot") : ""), "pending"));
     if (st.turn.assistant) log.append(bubble("assistant", st.turn.assistant, "pending"));
   }
   if (nearBottom || st.turn) log.scrollTop = log.scrollHeight;
 }
-const divider = (ms) => { const d = document.createElement("div"); d.className = "divider"; d.textContent = "ここから新しいトピック"; return d; };
+const divider = (ms) => { const d = document.createElement("div"); d.className = "divider"; d.textContent = t("topicDivider"); return d; };
 
 async function loadHistory({ older = false } = {}) {
   if (st.slot == null) return;
@@ -133,23 +134,23 @@ async function startChat() {
   st.api = new CodieAPI(st.cfg.deviceUrl, st.cfg.creds);
   $("clearOnNew").checked = st.cfg.clearOnNew;
   $("showOlder").checked = st.cfg.showOlder;
-  $("pairInfo").textContent = `${st.cfg.deviceUrl}(${st.cfg.creds.auth_scope || "?"})`;
+  $("pairInfo").textContent = `${t("pairedAs")}: ${st.cfg.deviceUrl} (${st.cfg.creds.auth_scope || "?"})`;
   show("chat");
-  setStatus("接続中…");
+  setStatus(t("connecting"));
   try {
     await fetchSlot();
     await loadHistory();
-    setStatus("オンライン", "online");
+    setStatus(t("online"), "online");
     openEvents();
   } catch (e) { handleConnError(e); }
 }
 function handleConnError(e) {
   const code = errCode(e);
   if (["LOCAL_SESSION_EXPIRED", "LOCAL_USER_MISMATCH", "LOCAL_SECRET_MISMATCH", "INVALID_SIGNATURE"].includes(code)) {
-    setStatus("認証エラー", "error");
-    showError(`${errText(e)}\n設定からペアリングし直してください。`);
+    setStatus(t("unauthorized"), "error");
+    showError(`${errText(e)}\n${t("reauth")}`);
   } else {
-    setStatus("オフライン", "error");
+    setStatus(t("offline"), "error");
     showError(errText(e));
   }
 }
@@ -185,7 +186,7 @@ async function send() {
   if ((!text && !attach) || st.turn) return;
   showError("");
   st.turn = { id: null, text, hasImage: !!attach, assistant: "" };
-  setBusy(true); $("turnText").textContent = "送信中…";
+  setBusy(true); $("turnText").textContent = t("sending");
   $("input").value = ""; clearAttach();
   render();
   try {
@@ -216,18 +217,18 @@ async function postTurn(text, attach) {
 async function pollTurn(id) {
   const deadline = Date.now() + 5 * 60 * 1000;
   while (Date.now() < deadline) {
-    const t = (await st.api.request("GET", `${P}/data/user/chat/turns/${id}`)).data;
-    if (t.assistant_text && st.turn) st.turn.assistant = t.assistant_text;
-    $("turnText").textContent = STATE_TEXT[t.state] || t.state;
+    const tn = (await st.api.request("GET", `${P}/data/user/chat/turns/${id}`)).data;
+    if (tn.assistant_text && st.turn) st.turn.assistant = tn.assistant_text;
+    $("turnText").textContent = (STATE_KEYS[tn.state] && t(STATE_KEYS[tn.state])) || tn.state;
     render();
-    if (TERMINAL.has(t.state)) {
-      if (t.state === "failed") showError(t.error ? `${t.error.code || ""} ${t.error.message || ""}`.trim() : "失敗しました");
-      else if (t.state === "cancelled") showError("中止しました");
-      return t;
+    if (TERMINAL.has(tn.state)) {
+      if (tn.state === "failed") showError(tn.error ? `${tn.error.code || ""} ${tn.error.message || ""}`.trim() : t("failed"));
+      else if (tn.state === "cancelled") showError(t("cancelled"));
+      return tn;
     }
     await sleep(1000);
   }
-  showError("時間切れです。端末側のターンは継続している場合があります。");
+  showError(t("timeout"));
 }
 async function cancelTurn() {
   if (!st.turn?.id) return;
@@ -250,13 +251,13 @@ async function captureScreen() {
       if (blob.size <= MAX_IMAGE) break;
       if (quality > 0.5) quality -= 0.15; else scale *= 0.75;
     }
-    if (blob.size > MAX_IMAGE) throw new Error("画像を 1 MiB 以下にできませんでした");
+    if (blob.size > MAX_IMAGE) throw new Error(t("imgTooBig"));
     clearAttach();
     st.attach = { blob, w, h, url: URL.createObjectURL(blob) };
     $("thumb").src = st.attach.url;
     $("attachInfo").textContent = `${w}×${h} / ${Math.round(blob.size / 1024)} KB`;
     $("attachment").hidden = false;
-  } catch (e) { showError("画面を取得できませんでした: " + errText(e)); }
+  } catch (e) { showError(t("screenFail") + errText(e)); }
 }
 function clearAttach() { if (st.attach) URL.revokeObjectURL(st.attach.url); st.attach = null; $("attachment").hidden = true; }
 
@@ -265,7 +266,7 @@ async function newTopic() {
   if (st.turn) return;
   showError("");
   const clear = st.cfg.clearOnNew;
-  if (clear && !confirm("端末に保存された Codie との会話履歴を消去して、新しいトピックを始めます。元に戻せません。よろしいですか?")) return;
+  if (clear && !confirm(t("confirmClear"))) return;
   try {
     if (clear) {
       await st.api.request("DELETE", `${P}/data/user/chat/history`);
@@ -296,7 +297,7 @@ $("pairStart").onclick = () => pairing(async () => {
 });
 $("pairConfirm").onclick = () => pairing(async () => {
   const c = await store.get();
-  if (!c.pairing) throw new Error("先に「ペアリング開始」を押してください");
+  if (!c.pairing) throw new Error(t("pairFirst"));
   const api = new CodieAPI(c.deviceUrl);
   const creds = await api.pairConfirm(c.pairing.challenge_id, $("code").value.trim(), c.pairing.user_id, c.scope);
   await store.set({ creds, pairing: null });
@@ -310,7 +311,7 @@ $("pairCancel").onclick = () => pairing(async () => {
 $("importCreds").onclick = () => pairing(async () => {
   const url = normalizeDeviceUrl($("deviceUrl").value);
   const c = JSON.parse($("credsJson").value);
-  if (!c.local_secret || !c.user_id) throw new Error("local_secret と user_id を含む JSON が必要です");
+  if (!c.local_secret || !c.user_id) throw new Error(t("needCreds"));
   await store.set({ deviceUrl: url, creds: c, pairing: null });
   await startChat();
 });
@@ -331,8 +332,11 @@ $("settingsClose").onclick = () => show(st.cfg.creds ? "chat" : "setup");
 $("clearOnNew").onchange = () => { st.cfg.clearOnNew = $("clearOnNew").checked; store.set({ clearOnNew: st.cfg.clearOnNew }); };
 $("showOlder").onchange = () => { st.cfg.showOlder = $("showOlder").checked; store.set({ showOlder: st.cfg.showOlder }); render(); };
 
+$("lang").onchange = async () => { st.cfg.lang = $("lang").value; await store.set({ lang: st.cfg.lang }); setLang(st.cfg.lang); applyI18n(); render(); };
+
 (async () => {
   const c = await store.get();
+  setLang(c.lang || detectLang()); applyI18n(); $("lang").value = getLang();
   if (c.creds && c.deviceUrl) await startChat();
-  else { $("deviceUrl").value = c.deviceUrl; $("codeBox").hidden = !c.pairing; show("setup"); setStatus("未接続"); }
+  else { $("deviceUrl").value = c.deviceUrl; $("codeBox").hidden = !c.pairing; show("setup"); setStatus(t("notConnected")); }
 })();

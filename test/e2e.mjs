@@ -22,12 +22,18 @@ try {
   const p = await ctx.newPage();
   p.on("dialog", (d) => d.accept());
   await p.goto(`chrome-extension://${id}/sidepanel/sidepanel.html`);
+  // 言語切替: 既定は Chrome の言語。en → zh → ja に切り替えて表示が変わることを確認
+  check("初期表示は英語(Chrome の言語)", (await p.textContent("#pairStart")) === "Start pairing", await p.textContent("#pairStart"));
+  await p.selectOption("#lang", "zh"); check("中国語に切り替わる", (await p.textContent("#pairStart")) === "开始配对");
+  await p.selectOption("#lang", "ja"); check("日本語に切り替わる", (await p.textContent("#pairStart")) === "ペアリング開始");
+  await p.reload();
+  check("言語設定が保存される", (await p.textContent("#pairStart")) === "ペアリング開始");
   await target.bringToFront();
 
   await p.fill("#deviceUrl", "http://127.0.0.1:18082");
   await p.click("#pairStart"); await p.waitForSelector("#codeBox:not([hidden])");
   await p.fill("#code", mock.CODE); await p.click("#pairConfirm");
-  await p.waitForFunction(() => document.getElementById("status").textContent === "オンライン", null, { timeout: 10000 });
+  await p.waitForFunction(() => document.getElementById("status").textContent === "オンライン", null, { timeout: 10000 }).catch(async (e) => { console.log("STATUS:", await p.textContent("#status"), "ERR:", await p.textContent("#setupError"), await p.textContent("#error")); throw e; });
   check("ペアリング→署名付きで slot と履歴を取得", mock.state.log.some((l) => l.includes("/chat/history")) && mock.state.log.some((l) => l.endsWith("/data/user/slot")), JSON.stringify(mock.state.log));
   check("WebSocket で chat_history を購読", await (async () => { for (let i = 0; i < 30; i++) { if (mock.state.subscribed.includes("chat_history")) return true; await new Promise((r) => setTimeout(r, 200)); } return false; })());
 

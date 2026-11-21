@@ -8,6 +8,6 @@ out=${1:-dist}
 name="codie-sidebar-chrome-extension-v${version}"
 rm -rf "$out/$name" "$out/$name.zip"
 mkdir -p "$out/$name"
-cp -r manifest.json README.md src sidepanel "$out/$name/"
+cp -r manifest.json README.md LICENSE src sidepanel "$out/$name/"
 (cd "$out" && zip -qr "$name.zip" "$name")
 echo "$out/$name.zip"

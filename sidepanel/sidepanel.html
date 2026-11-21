@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,47 +11,48 @@
   <strong>Codie</strong>
   <span id="status" class="status">…</span>
   <span class="spacer"></span>
-  <button id="newTopic" title="新しいトピック" hidden>＋ 新しいトピック</button>
-  <button id="settingsBtn" title="設定" hidden>⚙</button>
+  <select id="lang" data-i18n-title="language"><option value="en">English</option><option value="ja">日本語</option><option value="zh">中文</option></select>
+  <button id="newTopic" data-i18n="newTopic" data-i18n-title="newTopicTitle" hidden></button>
+  <button id="settingsBtn" data-i18n-title="settingsTitle" hidden>⚙</button>
 </header>
 
 <section id="setup" hidden>
-  <p>Codie 端末(1.6.0)とペアリングします。端末をスリープ解除・ロック解除してください。</p>
-  <label>端末アドレス <input id="deviceUrl" placeholder="http://192.168.0.39:8081" spellcheck="false"></label>
-  <label>認証の種類 <select id="scope"><option value="session">session(12時間で失効・推奨)</option><option value="permanent">permanent(長期)</option></select></label>
-  <div class="row"><button id="pairStart">ペアリング開始</button></div>
+  <p data-i18n="setupIntro"></p>
+  <label><span data-i18n="deviceUrl"></span> <input id="deviceUrl" placeholder="http://192.168.0.39:8081" spellcheck="false"></label>
+  <label><span data-i18n="scope"></span> <select id="scope"><option value="session" data-i18n="scopeSession"></option><option value="permanent" data-i18n="scopePermanent"></option></select></label>
+  <div class="row"><button id="pairStart" data-i18n="pairStart"></button></div>
   <div id="codeBox" hidden>
-    <label>端末に表示されたコード <input id="code" inputmode="numeric" autocomplete="off"></label>
-    <div class="row"><button id="pairConfirm">確定</button><button id="pairCancel" class="ghost">キャンセル</button></div>
+    <label><span data-i18n="pairCode"></span> <input id="code" inputmode="numeric" autocomplete="off"></label>
+    <div class="row"><button id="pairConfirm" data-i18n="confirm"></button><button id="pairCancel" class="ghost" data-i18n="cancel"></button></div>
   </div>
   <details>
-    <summary>ペアリングが拒否される場合</summary>
-    <p class="hint"><code>examples/local_api.py</code> が作った credentials.json の中身を貼り付けて取り込めます。</p>
+    <summary data-i18n="importSummary"></summary>
+    <p class="hint" data-i18n="importHint"></p>
     <textarea id="credsJson" rows="4" placeholder='{"user_id": "...", "local_secret": "...", ...}'></textarea>
-    <div class="row"><button id="importCreds">取り込む</button></div>
+    <div class="row"><button id="importCreds" data-i18n="importBtn"></button></div>
   </details>
   <p id="setupError" class="error"></p>
 </section>
 
 <section id="settings" hidden>
-  <h3>設定</h3>
+  <h3 data-i18n="settings"></h3>
   <p id="pairInfo" class="hint"></p>
-  <label class="check"><input type="checkbox" id="clearOnNew"> 新しいトピックで端末の履歴も消去する(元に戻せません)</label>
-  <label class="check"><input type="checkbox" id="showOlder"> 現在のトピックより前の履歴も表示する</label>
-  <div class="row"><button id="unpair" class="danger">ペアリング解除</button><button id="settingsClose" class="ghost">閉じる</button></div>
+  <label class="check"><input type="checkbox" id="clearOnNew"> <span data-i18n="clearOnNew"></span></label>
+  <label class="check"><input type="checkbox" id="showOlder"> <span data-i18n="showOlder"></span></label>
+  <div class="row"><button id="unpair" class="danger" data-i18n="unpair"></button><button id="settingsClose" class="ghost" data-i18n="close"></button></div>
 </section>
 
 <main id="chat" hidden>
   <div id="log" aria-live="polite"></div>
-  <div id="turnStatus" class="turn-status" hidden><span id="turnText"></span><button id="cancelTurn" class="ghost">中止</button></div>
-  <div id="attachment" class="attachment" hidden><img id="thumb" alt=""><span id="attachInfo"></span><button id="removeAttach" class="ghost" title="取り消し">×</button></div>
+  <div id="turnStatus" class="turn-status" hidden><span id="turnText"></span><button id="cancelTurn" class="ghost" data-i18n="stop"></button></div>
+  <div id="attachment" class="attachment" hidden><img id="thumb" alt=""><span id="attachInfo"></span><button id="removeAttach" class="ghost" data-i18n-title="removeAttach">×</button></div>
   <div id="error" class="error"></div>
   <form id="composer">
-    <textarea id="input" rows="2" placeholder="Codie に話しかける(Enterで送信 / Shift+Enterで改行)"></textarea>
+    <textarea id="input" rows="2" data-i18n-ph="placeholder"></textarea>
     <div class="row">
-      <button type="button" id="shot" title="表示中のタブの画面を添付">📷 画面を添付</button>
+      <button type="button" id="shot" data-i18n="shot" data-i18n-title="shotTitle"></button>
       <span class="spacer"></span>
-      <button type="submit" id="send">送信</button>
+      <button type="submit" id="send" data-i18n="send"></button>
     </div>
   </form>
 </main>
