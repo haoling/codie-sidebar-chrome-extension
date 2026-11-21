@@ -108,11 +108,28 @@ function scheduleRefresh() {
 }
 
 // ---------- 端末との接続 ----------
+/**
+ * 端末は Origin ヘッダー付きのペアリング要求を拒否する(PAIRING_SOURCE_NOT_ALLOWED)。
+ * 拡張からの fetch / WebSocket には Origin: chrome-extension://… が付くため、端末宛てだけ Origin / Referer を外す。
+ * (codie-browser-hands と同じ対処)
+ */
+async function updateOriginRule(deviceUrl) {
+  const removeRuleIds = [1];
+  if (!deviceUrl) return chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds });
+  const addRules = [{
+    id: 1, priority: 1,
+    action: { type: "modifyHeaders", requestHeaders: [{ header: "origin", operation: "remove" }, { header: "referer", operation: "remove" }] },
+    condition: { requestDomains: [new URL(deviceUrl).hostname], resourceTypes: ["xmlhttprequest", "websocket"], initiatorDomains: [chrome.runtime.id] },
+  }];
+  return chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
+}
+
 async function fetchSlot() {
   st.slot = (await st.api.request("GET", `${P}/data/user/slot`)).data.slot_number;
 }
 async function startChat() {
   st.cfg = await store.get();
+  await updateOriginRule(st.cfg.deviceUrl);
   st.api = new CodieAPI(st.cfg.deviceUrl, st.cfg.creds);
   $("clearOnNew").checked = st.cfg.clearOnNew;
   $("showOlder").checked = st.cfg.showOlder;
@@ -271,6 +288,7 @@ async function pairing(fn) {
 }
 $("pairStart").onclick = () => pairing(async () => {
   const url = normalizeDeviceUrl($("deviceUrl").value);
+  await updateOriginRule(url);
   const api = new CodieAPI(url);
   const r = await api.pairRequest();
   await store.set({ deviceUrl: url, scope: $("scope").value, pairing: r });

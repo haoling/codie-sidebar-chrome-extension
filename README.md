@@ -14,6 +14,7 @@ Chrome のサイドバーから Codie(1.6.0 の LAN HTTP API)とチャットす�
 3. ペアリングが拒否される場合は `examples/local_api.py` の credentials.json を「取り込む」に貼り付け。
 
 ## 注意
+- 端末は `Origin` 付きのペアリング要求を拒否する(`PAIRING_SOURCE_NOT_ALLOWED`)ため、`declarativeNetRequest` で端末宛ての fetch / WebSocket から `Origin` / `Referer` を外しています(codie-browser-hands と同じ対処)。
 - `host_permissions: <all_urls>` は端末(LAN)への通信と画面キャプチャのために使います。
 - 認証情報は `chrome.storage.local` に平文保存(既定は 12 時間の session)。
 - 画面を送ると、その画像は Codie のモデルに渡ります。見せたくないタブは開いたまま送らないでください。

@@ -57,6 +57,8 @@ export function startMock(port) {
     const path = url.pathname;
     state.origins.push(req.headers.origin || null);
     state.log.push(`${req.method} ${path}`);
+    // 実機と同様、Origin 付きのペアリング要求は拒否する
+    if (path.startsWith("/v1/api/auth/pair/") && req.headers.origin) return send(res, 403, { code: "PAIRING_SOURCE_NOT_ALLOWED", message: "Pairing request source not allowed" });
     if (path === "/v1/api/auth/bootstrap") return send(res, 200, { success: true, data: { user_id: USER } });
     if (path === "/v1/api/auth/pair/request") return send(res, 200, { success: true, data: { challenge_id: "chal-1" } });
     if (path === "/v1/api/auth/pair/confirm") {
