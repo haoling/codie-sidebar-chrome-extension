@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Codie Sidebar",
+  "version": "0.1.0",
+  "description": "Chromeのサイドバーから Codie とチャット。履歴の表示、テキスト送信(返答は端末の音声)、画面の送信、新しいトピックに対応。",
+  "minimum_chrome_version": "116",
+  "permissions": ["storage", "sidePanel", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "src/background.js", "type": "module" },
+  "action": { "default_title": "Codie Sidebar" },
+  "side_panel": { "default_path": "sidepanel/sidepanel.html" }
+}
