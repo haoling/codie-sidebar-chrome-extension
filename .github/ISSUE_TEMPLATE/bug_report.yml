@@ -1,0 +1,43 @@
+name: Bug report / バグ報告 / 问题反馈
+description: Report something that does not work / うまく動かないことを報告 / 报告问题
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste your Codie's `local_secret`, credentials, or private page contents.
+        `local_secret` や認証情報、見られたくないページの内容は貼らないでください。
+        请不要粘贴 `local_secret`、凭据或私密页面内容。
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened / 何が起きたか / 发生了什么
+      description: What you did, and what happened instead. The error text shown in the side panel is very helpful.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected / 期待した動作 / 期望的行为
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / 再現手順 / 复现步骤
+      description: Include what you did in the side panel (send text, attach screen, new topic, pairing, ...).
+  - type: input
+    id: ext
+    attributes:
+      label: Extension version / 拡張のバージョン / 扩展版本
+      placeholder: "0.1.2"
+    validations:
+      required: true
+  - type: input
+    id: chrome
+    attributes:
+      label: Chrome version and OS / Chrome のバージョンと OS / Chrome 版本和系统
+      placeholder: "Chrome 142, Windows 11"
+  - type: input
+    id: fw
+    attributes:
+      label: CODE27 firmware / ファームウェア / 固件版本
+      placeholder: "1.6.0"

@@ -1,0 +1,18 @@
+name: Feature request / 機能要望 / 功能建议
+description: Suggest an idea / 要望を伝える / 提出建议
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: want
+    attributes:
+      label: What do you want to be able to do? / やりたいこと / 想做什么
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why / 理由・困っていること / 原因
+  - type: textarea
+    id: idea
+    attributes:
+      label: Ideas for how it could work / 実現方法のアイデア / 实现思路
