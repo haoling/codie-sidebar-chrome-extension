@@ -1,0 +1,49 @@
+name: Release
+
+# v* タグを push すると、拡張機能の zip を作って GitHub Releases に公開する。
+# 例: manifest.json の version を 0.1.0 にして `git tag v0.1.0 && git push origin v0.1.0`
+# タグを push できない環境向けに、Actions タブから手動実行(tag に v0.1.0 などを入力)しても同じ Release を作れる。
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "公開するタグ(例: v0.1.0)。manifest.json の version と一致させる"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: タグ名を決定
+        run: echo "TAG=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_ENV"
+
+      - name: タグと manifest.json の version が一致するか確認
+        run: |
+          version=$(python3 -c 'import json;print(json.load(open("manifest.json"))["version"])')
+          if [ "v${version}" != "${TAG}" ]; then
+            echo "::error::タグ ${TAG} と manifest.json の version (${version}) が一致しません"
+            exit 1
+          fi
+
+      - name: zip を作成
+        id: build
+        run: echo "zip=$(scripts/build-zip.sh dist)" >> "$GITHUB_OUTPUT"
+
+      - name: Release を作成して zip を添付
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          zip="${{ steps.build.outputs.zip }}"
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            gh release upload "${TAG}" "${zip}" --clobber
+          else
+            gh release create "${TAG}" "${zip}" --target "${GITHUB_SHA}" --title "${TAG}" --generate-notes
+          fi

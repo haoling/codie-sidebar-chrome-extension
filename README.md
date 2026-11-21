@@ -20,3 +20,6 @@ Chrome のサイドバーから Codie(1.6.0 の LAN HTTP API)とチャットす�
 
 ## 検証
 `cd test && npm i && node e2e.mjs`: 署名を仕様どおりに検証するモック端末+実 Chromium で、ペアリング・履歴・WS 更新・テキスト/画面送信・新トピック(区切り/消去)・失敗表示を確認済み。**実機は未検証**。実機で要確認: 拡張の Origin(`chrome-extension://`)でのペアリング可否、`chat_history` イベントの形、画像履歴の `content_type`。
+
+## 開発・リリース
+`scripts/build-zip.sh` で配布用 zip(`dist/codie-sidebar-chrome-extension-vX.Y.Z.zip`、`test/` は含まない)を作れます。リリースは `manifest.json` の `version` を更新して `v0.1.0` のようなタグを push すると、GitHub Actions が zip を Releases に公開します(Actions タブから手動実行も可)。
