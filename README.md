@@ -45,7 +45,7 @@ The language (English / 日本語 / 中文) can be switched with the selector at
 - The device may shrink the screenshot, so small text can be hard for Codie to read. Zoom the page in before attaching if you need Codie to read details.
 - There is no dedicated "new topic" API on the device, so the divider and the optional history erase are the closest equivalents.
 - Pairing is `session` (12 h) by default; the secret is stored in `chrome.storage.local`. If browser pairing is rejected, paste a `credentials.json` made by `examples/local_api.py` (from the Codie API package) into **Import**.
-- If you hit a problem, please open an issue.
+- If you hit a problem, please open an [issue](../../issues/new/choose). Pull requests are welcome too — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Development: `scripts/build-zip.sh` builds the zip; `cd test && npm i && node e2e.mjs` runs the end-to-end test against a mock device (the `test/` folder is not included in the release zip).
 Release: set `version` in `manifest.json`, then push a tag such as `v0.1.0` (or run the Release workflow manually); GitHub Actions publishes the zip.
@@ -96,7 +96,7 @@ LAN 上の自分の Codie と直接通信します。中継サーバーは使い
 - 端末側でスクリーンショットが縮小されることがあり、小さな文字は Codie が読みにくい場合があります。細部を読ませたいときは、ページを拡大してから添付してください。
 - 端末に「新しいトピック」専用の API が無いため、区切りと、任意の履歴消去で代用しています。
 - ペアリングは既定で `session`（12 時間）です。鍵は `chrome.storage.local` に保存されます。ブラウザーからのペアリングが拒否される場合は、Codie API パッケージの `examples/local_api.py` で作った `credentials.json` を**取り込む**に貼り付けてください。
-- 不具合があれば issue で教えてください。
+- 不具合があれば [issue](../../issues/new/choose) で教えてください。プルリクエストも歓迎です（[CONTRIBUTING.md](CONTRIBUTING.md) 参照）。
 
 開発者向け: `scripts/build-zip.sh` で zip を作れます。`cd test && npm i && node e2e.mjs` でモック端末を使った E2E テストを実行できます（`test/` はリリース zip に含まれません）。
 リリース: `manifest.json` の `version` を更新し、`v0.1.0` のようなタグを push（または Release ワークフローを手動実行）すると、GitHub Actions が zip を公開します。
@@ -147,7 +147,7 @@ LAN 上の自分の Codie と直接通信します。中継サーバーは使い
 - 设备可能会缩小截图，较小的文字 Codie 可能读不清。需要读取细节时，请先放大页面再附加。
 - 设备没有专门的“新话题”API，因此用分隔线和可选的清除记录来代替。
 - 配对默认为 `session`（12 小时），密钥保存在 `chrome.storage.local`。如果浏览器配对被拒绝，请把 Codie API 包中 `examples/local_api.py` 生成的 `credentials.json` 粘贴到**导入**中。
-- 如遇问题，请提交 issue。
+- 如遇问题，请提交 [issue](../../issues/new/choose)，也欢迎提交 Pull Request（见 [CONTRIBUTING.md](CONTRIBUTING.md)）。
 
 开发：`scripts/build-zip.sh` 可生成 zip；`cd test && npm i && node e2e.mjs` 使用模拟设备运行端到端测试（`test/` 不包含在发布的 zip 中）。
 发布：更新 `manifest.json` 的 `version` 后推送 `v0.1.0` 之类的标签（或手动运行 Release 工作流），GitHub Actions 会发布 zip。
