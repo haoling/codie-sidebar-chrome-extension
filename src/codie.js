@@ -1,4 +1,5 @@
 // Codie 1.6.0 LAN API のクライアント。HMAC-SHA256 署名は WebCrypto で計算する。
+import { t } from "./i18n.js";
 const enc = new TextEncoder();
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 
@@ -24,7 +25,7 @@ export async function hmacHex(secret, message) {
 export function normalizeDeviceUrl(input) {
   const url = new URL(input.trim());
   if (!["http:", "https:"].includes(url.protocol) || (url.pathname !== "/" && url.pathname !== "") || url.search || url.hash) {
-    throw new Error("端末アドレスは http://IP:8081 の形式で、パスやクエリを付けずに指定してください");
+    throw new Error(t("badUrl"));
   }
   return url.origin;
 }

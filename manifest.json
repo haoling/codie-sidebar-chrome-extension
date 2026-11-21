@@ -1,12 +1,26 @@
 {
   "manifest_version": 3,
   "name": "Codie Sidebar",
-  "version": "0.1.1",
-  "description": "Chromeのサイドバーから Codie とチャット。履歴の表示、テキスト送信(返答は端末の音声)、画面の送信、新しいトピックに対応。",
+  "version": "0.1.2",
+  "description": "Chat with your Codie (CODE27) from Chrome's side panel: history, text chat with spoken replies, screen sharing and new topics. Unofficial beta.",
   "minimum_chrome_version": "116",
-  "permissions": ["storage", "sidePanel", "tabs", "declarativeNetRequest"],
-  "host_permissions": ["<all_urls>"],
-  "background": { "service_worker": "src/background.js", "type": "module" },
-  "action": { "default_title": "Codie Sidebar" },
-  "side_panel": { "default_path": "sidepanel/sidepanel.html" }
+  "permissions": [
+    "storage",
+    "sidePanel",
+    "tabs",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Codie Sidebar"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  }
 }
